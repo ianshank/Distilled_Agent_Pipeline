@@ -379,6 +379,7 @@ If you use this framework in your research or production systems, please cite:
 
 ---
 
-**Built with ❤️ for the AI community**
+Ian Cruickshank
+October, 2025
 
 For detailed documentation, see the [NLM Framework README](NLM/README.md) and [Architecture Guide](NLM/ARCHITECTURE.md).
