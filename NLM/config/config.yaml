@@ -1,0 +1,59 @@
+# NLM Distillation Training Configuration
+# Override via environment variables (NLM_*) or CLI flags
+
+# Model configuration
+# For Granite-4-MoE, set via environment: NLM_TEACHER_MODEL_ID=ibm/granite-4-moe-xxx
+teacher_model_id: "sshleifer/tiny-gpt2"
+student_model_id: "distilgpt2"
+
+# Data paths (relative to project root)
+train_file: null  # Must be provided via CLI or environment
+eval_file: null
+output_dir: "outputs/default"
+
+# Training hyperparameters
+num_train_epochs: 3
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 5.0e-5
+weight_decay: 0.01
+warmup_steps: 100
+max_length: 512
+
+# Optimization
+use_fp16: false  # Enable on CUDA
+use_device_map: false  # Enable for large models on CUDA
+device_preference:
+  - cuda
+  - mps
+  - cpu
+
+# LoRA configuration
+lora:
+  enabled: true
+  rank: 16
+  alpha: 32
+  dropout: 0.1
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+
+# Distillation configuration
+distillation:
+  alpha: 0.5  # 0 = pure task loss, 1 = pure distillation
+  temperature: 2.0
+
+# Logging and monitoring
+logging_steps: 100
+save_steps: 500
+save_total_limit: 2
+eval_steps: 500
+use_wandb: false  # Set to true and provide WANDB_API_KEY for tracking
+
+# Agent metadata
+agent_name: "default-agent"
+agent_role: "Default"
+

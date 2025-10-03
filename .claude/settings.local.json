@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(pytest:*)",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest -v --tb=short -m \"not slow\")",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest -v --tb=short -m \"slow\")",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest --cov=nlm --cov-report=term --cov-report=html -v)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest --cov=nlm --cov-report=term --cov-report=html:htmlcov -v)",
+      "Bash(test:*)",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest -v -m \"not slow\")",
+      "Bash(tree:*)",
+      "Bash(/Users/iancruickshank/Distilled_Agents/.venv/bin/python -m pytest -v --tb=line -x)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
