@@ -40,9 +40,18 @@ cd Distilled_Agent_Pipeline/NLM
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install the package (editable). Extras:
+#   .[ml]   -> torch/transformers/peft for training, inference, fidelity
+#   .[dev]  -> pytest, ruff, black, mypy, pre-commit
+#   .[aws]  -> sagemaker/boto3
+pip install -e ".[ml,dev]"
+
+# Light install (config + evaluation metrics + dataset validation only, no torch):
+#   pip install -e .
 ```
+
+This installs console entry points: `nlm-train`, `nlm-serve`, `nlm-eval`,
+and `nlm-validate-data`.
 
 ### Run Smoke Test
 
@@ -91,10 +100,11 @@ Distilled_Agent_Pipeline/
 ├── NLM/                          # Core distillation framework
 │   ├── nlm/                      # Python package
 │   │   ├── config/              # Configuration management
-│   │   ├── data/                # Dataset loading
-│   │   ├── models/              # Model loaders, device selection
+│   │   ├── data/                # Dataset loading + validation
+│   │   ├── models/              # Model loaders, device selection, LoRA setup
 │   │   ├── training/            # Training engine & CLI
-│   │   └── inference/           # Inference server
+│   │   ├── inference/           # Inference server
+│   │   └── eval/                # Distilled-agent evaluation harness
 │   ├── tests/                    # Comprehensive test suite
 │   ├── config/                   # Configuration files
 │   ├── ARCHITECTURE.md           # Detailed architecture docs
@@ -377,10 +387,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### v1.1 (Next Release)
 - [x] Distilled-agent evaluation harness (metrics, benchmarks, fidelity, reports)
+- [x] `nlm.models` loaders (device selection, teacher/student, guarded LoRA)
+- [x] Packaging (`pyproject.toml`, entry points) + lint/type config
+- [x] Dataset validation (`nlm.data.validation`)
+- [x] GitHub Actions CI/CD pipeline (tiered: fast / full / lint / validate-data)
 - [ ] Multi-GPU training support (DistributedDataParallel)
 - [ ] Model quantization (INT8/INT4) for inference
 - [ ] MLflow model registry integration
-- [ ] GitHub Actions CI/CD pipeline
 
 ### v1.2 (Future)
 - [ ] Multi-teacher distillation

@@ -16,8 +16,8 @@ Public API:
 """
 
 from nlm.eval.benchmark import (
-    EvalCase,
     CaseResult,
+    EvalCase,
     EvalReport,
     load_benchmark,
 )
@@ -25,13 +25,13 @@ from nlm.eval.metrics import (
     DEFAULT_METRICS,
     METRIC_FUNCTIONS,
     exact_match,
-    token_f1,
-    rouge_l,
     keyword_recall,
     normalize_text,
+    rouge_l,
+    token_f1,
 )
+from nlm.eval.report import render_html_report, write_html_report, write_json_report
 from nlm.eval.runner import Generator, ModelGenerator, evaluate
-from nlm.eval.report import write_json_report, write_html_report, render_html_report
 
 __all__ = [
     "EvalCase",

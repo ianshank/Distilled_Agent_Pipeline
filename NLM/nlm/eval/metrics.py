@@ -6,7 +6,6 @@ return a float score in the range [0.0, 1.0] where higher is better. This keeps
 them fast to unit test and safe to import in environments without torch.
 """
 
-import re
 import string
 from typing import Callable, Dict, List, Sequence
 
