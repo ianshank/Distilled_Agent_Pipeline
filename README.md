@@ -250,6 +250,29 @@ pytest tests/ --cov=nlm --cov-report=html
 - **Unit Tests** (40+): Config, data, models, loss computation
 - **Contract Tests** (10+): API schema validation, Flask endpoints
 - **Integration Tests** (2): End-to-end training with tiny models
+- **Eval Harness Tests** (40+): Scoring metrics, benchmark loading, runner, teacher-student fidelity
+
+## Evaluation Harness
+
+Training optimizes a distillation loss, but loss alone doesn't tell you whether
+the resulting agent answers prompts correctly. The evaluation harness
+(`NLM/nlm/eval/`) scores a trained student against a held-out JSONL **benchmark**
+using generation-quality metrics (exact match, token F1, ROUGE-L), behavioral
+keyword checks, and optional **teacher-student fidelity** (top-1 agreement, KL
+divergence). It emits JSON + HTML reports and a pass/fail gate for CI.
+
+```bash
+cd NLM
+python -m nlm.eval.cli \
+  --model-dir outputs/swe_agent/final \
+  --benchmark benchmarks/swe_agent_eval.jsonl \
+  --output-dir eval_outputs/swe_agent \
+  --threshold 0.6
+```
+
+The process exits non-zero when the overall score is below `--threshold`. See
+[docs/EVALUATION_HARNESS.md](docs/EVALUATION_HARNESS.md) for the benchmark
+format, metric definitions, and Python API.
 
 ## Performance
 
@@ -353,6 +376,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Roadmap
 
 ### v1.1 (Next Release)
+- [x] Distilled-agent evaluation harness (metrics, benchmarks, fidelity, reports)
 - [ ] Multi-GPU training support (DistributedDataParallel)
 - [ ] Model quantization (INT8/INT4) for inference
 - [ ] MLflow model registry integration

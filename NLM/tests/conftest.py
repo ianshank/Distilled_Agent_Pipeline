@@ -7,7 +7,10 @@ import json
 from pathlib import Path
 
 import pytest
-import torch
+
+# torch is imported lazily inside the fixtures that need it so that
+# pure-Python test suites (config, data, eval metrics) can run in
+# environments without the heavy ML stack installed.
 
 # Add NLM to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -85,6 +88,8 @@ distillation:
 @pytest.fixture
 def mock_device_cuda(monkeypatch):
     """Mock CUDA availability."""
+    import torch
+
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
     monkeypatch.setattr(torch.cuda, "get_device_name", lambda x: "Mock GPU")
 
@@ -92,6 +97,8 @@ def mock_device_cuda(monkeypatch):
 @pytest.fixture
 def mock_device_cpu(monkeypatch):
     """Mock CPU-only environment."""
+    import torch
+
     monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     if hasattr(torch.backends, "mps"):
         monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
