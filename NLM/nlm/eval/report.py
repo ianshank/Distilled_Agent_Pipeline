@@ -19,7 +19,7 @@ def write_json_report(report: EvalReport, path: str) -> None:
     """Write the report as indented JSON."""
     out_path = Path(path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(report.to_dict(), f, indent=2)
     logger.info("Wrote JSON report to %s", out_path)
 
@@ -106,6 +106,6 @@ def write_html_report(report: EvalReport, path: str) -> None:
     """Write the report as an HTML file."""
     out_path = Path(path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(render_html_report(report))
     logger.info("Wrote HTML report to %s", out_path)

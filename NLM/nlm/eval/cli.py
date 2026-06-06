@@ -97,19 +97,27 @@ def _print_summary(report: EvalReport) -> None:
     print("=" * 60 + "\n")
 
 
-def _maybe_add_fidelity(report: EvalReport, args: argparse.Namespace) -> None:
+def _maybe_add_fidelity(
+    report: EvalReport, args: argparse.Namespace, generator: ModelGenerator
+) -> None:
     """Compute teacher-student fidelity when a teacher dir is supplied."""
     if not args.teacher_model_dir:
         return
     try:
+        import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         from nlm.eval.fidelity import evaluate_fidelity
-        from nlm.inference.server import InferenceServer
 
-        student = InferenceServer(args.model_dir)
+        # Reuse the already-loaded student model rather than loading it a second
+        # time, which would double memory use and risk OOM on large models.
+        student = generator.server
         tokenizer = AutoTokenizer.from_pretrained(args.teacher_model_dir)
-        teacher = AutoModelForCausalLM.from_pretrained(args.teacher_model_dir)
+        teacher = AutoModelForCausalLM.from_pretrained(
+            args.teacher_model_dir,
+            torch_dtype=torch.float16 if student.device.type == "cuda" else torch.float32,
+            low_cpu_mem_usage=True,
+        )
         teacher = teacher.to(student.device)
 
         prompts = [c.prompt for c in load_benchmark(args.benchmark)]
@@ -143,7 +151,7 @@ def main(argv=None) -> int:
         benchmark=args.benchmark,
     )
 
-    _maybe_add_fidelity(report, args)
+    _maybe_add_fidelity(report, args, generator)
 
     out_dir = Path(args.output_dir)
     write_json_report(report, str(out_dir / "report.json"))

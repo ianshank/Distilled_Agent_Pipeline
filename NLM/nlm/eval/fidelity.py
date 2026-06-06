@@ -38,8 +38,10 @@ def top1_agreement(
     Returns:
         Top-1 agreement rate in [0.0, 1.0].
     """
-    student_pred = student_logits.argmax(dim=-1)
-    teacher_pred = teacher_logits.argmax(dim=-1)
+    # Guard against differing vocab padding between the two models.
+    min_vocab = min(student_logits.size(-1), teacher_logits.size(-1))
+    student_pred = student_logits[..., :min_vocab].argmax(dim=-1)
+    teacher_pred = teacher_logits[..., :min_vocab].argmax(dim=-1)
     match = (student_pred == teacher_pred)
 
     if attention_mask is not None:
@@ -73,12 +75,19 @@ def kl_fidelity(
     Returns:
         Mean per-position KL divergence (>= 0.0).
     """
-    student_log_probs = F.log_softmax(student_logits / temperature, dim=-1)
-    teacher_probs = F.softmax(teacher_logits / temperature, dim=-1)
+    # Guard against differing vocab padding between the two models.
+    min_vocab = min(student_logits.size(-1), teacher_logits.size(-1))
+    student_logits = student_logits[..., :min_vocab]
+    teacher_logits = teacher_logits[..., :min_vocab]
 
-    # Per-position KL: sum over vocab of p * (log p - log q).
+    student_log_probs = F.log_softmax(student_logits / temperature, dim=-1)
+    teacher_log_probs = F.log_softmax(teacher_logits / temperature, dim=-1)
+
+    # Per-position KL: sum over vocab of p * (log p - log q). Passing both as
+    # log-probs with log_target=True is numerically stable and avoids NaNs when
+    # FP16 softmax probabilities underflow to 0.0.
     per_position = F.kl_div(
-        student_log_probs, teacher_probs, reduction="none"
+        student_log_probs, teacher_log_probs, reduction="none", log_target=True
     ).sum(dim=-1) * (temperature ** 2)
 
     if attention_mask is not None:

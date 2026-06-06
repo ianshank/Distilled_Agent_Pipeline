@@ -53,9 +53,18 @@ class ModelGenerator:
     def generate(self, prompt: str) -> str:
         from nlm.inference.server import InferenceRequest
 
+        # InferenceRequest.max_length is the total (prompt + generation) length,
+        # so size it to the prompt plus the requested new tokens to avoid
+        # truncating long prompts to empty generations. Capped at the schema max.
+        if self.server.tokenizer is not None:
+            prompt_len = len(self.server.tokenizer.encode(prompt))
+        else:
+            prompt_len = len(prompt) // 4
+        max_len = min(prompt_len + self.max_new_tokens, 2048)
+
         request = InferenceRequest(
             prompt=prompt,
-            max_length=self.max_new_tokens,
+            max_length=max_len,
             do_sample=self.do_sample,
             temperature=self.temperature,
             num_return_sequences=1,

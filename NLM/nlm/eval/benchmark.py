@@ -104,7 +104,7 @@ def load_benchmark(path: str) -> List[EvalCase]:
     cases: List[EvalCase] = []
     skipped = 0
 
-    with open(benchmark_path, "r") as f:
+    with open(benchmark_path, "r", encoding="utf-8") as f:
         for line_num, line in enumerate(f, start=1):
             line = line.strip()
             if not line:
@@ -130,16 +130,22 @@ def load_benchmark(path: str) -> List[EvalCase]:
 
             case_id = str(record.get("id") or f"case-{line_num}")
 
-            cases.append(
-                EvalCase(
-                    id=case_id,
-                    prompt=prompt,
-                    reference=reference.strip() if isinstance(reference, str) else reference,
-                    keywords=list(keywords),
-                    weight=float(record.get("weight", 1.0)),
-                    metadata=record.get("metadata", {}) or {},
+            try:
+                cases.append(
+                    EvalCase(
+                        id=case_id,
+                        prompt=prompt,
+                        reference=reference.strip() if isinstance(reference, str) else reference,
+                        keywords=list(keywords),
+                        weight=float(record.get("weight", 1.0)),
+                        metadata=record.get("metadata", {}) or {},
+                    )
                 )
-            )
+            except Exception as e:
+                # Malformed records (e.g. non-positive weight) are skipped, not fatal.
+                logger.warning("Skipping line %d: validation failed - %s", line_num, e)
+                skipped += 1
+                continue
 
     if skipped:
         logger.warning("Skipped %d invalid lines while loading benchmark", skipped)
