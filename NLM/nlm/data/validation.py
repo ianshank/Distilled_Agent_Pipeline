@@ -159,9 +159,7 @@ def validate_dataset(
 
     # Non-fatal observations.
     if report.duplicate_prompts:
-        report.warnings.append(
-            f"{report.duplicate_prompts} duplicate prompt(s)/text(s) detected"
-        )
+        report.warnings.append(f"{report.duplicate_prompts} duplicate prompt(s)/text(s) detected")
     if report.invalid_records:
         report.warnings.append(f"{report.invalid_records} invalid record(s) skipped")
 
@@ -208,9 +206,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Permit a mix of prompt/completion and text records",
     )
-    parser.add_argument(
-        "--strict", action="store_true", help="Treat warnings as failures"
-    )
+    parser.add_argument("--strict", action="store_true", help="Treat warnings as failures")
     parser.add_argument("--json", action="store_true", help="Emit JSON reports")
     return parser
 
@@ -233,9 +229,7 @@ def main(argv=None) -> int:
             )
         except FileNotFoundError as e:
             logger.error("%s", e)
-            reports.append(
-                DatasetValidationReport(path=path, errors=[str(e)], passed=False)
-            )
+            reports.append(DatasetValidationReport(path=path, errors=[str(e)], passed=False))
             continue
 
         reports.append(report)

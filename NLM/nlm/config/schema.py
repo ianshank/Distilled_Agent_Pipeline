@@ -25,7 +25,7 @@ class LoRAConfig(BaseModel):
     dropout: float = Field(default=0.1, ge=0.0, le=1.0, description="LoRA dropout")
     target_modules: List[str] = Field(
         default_factory=lambda: ["q_proj", "v_proj", "k_proj", "o_proj"],
-        description="Target module names for LoRA"
+        description="Target module names for LoRA",
     )
 
     model_config = ConfigDict(frozen=False)
@@ -50,26 +50,17 @@ class TrainingConfig(BaseSettings):
 
     # Model configuration
     teacher_model_id: str = Field(
-        default="sshleifer/tiny-gpt2",
-        description="HuggingFace model ID for teacher"
+        default="sshleifer/tiny-gpt2", description="HuggingFace model ID for teacher"
     )
     student_model_id: str = Field(
-        default="distilgpt2",
-        description="HuggingFace model ID for student"
+        default="distilgpt2", description="HuggingFace model ID for student"
     )
 
     # Data paths
-    train_file: Optional[str] = Field(
-        default=None,
-        description="Path to training JSONL file"
-    )
-    eval_file: Optional[str] = Field(
-        default=None,
-        description="Path to evaluation JSONL file"
-    )
+    train_file: Optional[str] = Field(default=None, description="Path to training JSONL file")
+    eval_file: Optional[str] = Field(default=None, description="Path to evaluation JSONL file")
     output_dir: str = Field(
-        default="outputs/default",
-        description="Output directory for models and logs"
+        default="outputs/default", description="Output directory for models and logs"
     )
 
     # Training hyperparameters
@@ -86,15 +77,13 @@ class TrainingConfig(BaseSettings):
     use_fp16: bool = Field(default=False, description="Enable mixed precision (FP16)")
     use_device_map: bool = Field(default=False, description="Enable device_map='auto'")
     device_preference: List[Literal["cuda", "mps", "cpu"]] = Field(
-        default_factory=lambda: ["cuda", "mps", "cpu"],
-        description="Device preference order"
+        default_factory=lambda: ["cuda", "mps", "cpu"], description="Device preference order"
     )
 
     # LoRA and Distillation
     lora: LoRAConfig = Field(default_factory=LoRAConfig, description="LoRA configuration")
     distillation: DistillationConfig = Field(
-        default_factory=DistillationConfig,
-        description="Distillation configuration"
+        default_factory=DistillationConfig, description="Distillation configuration"
     )
 
     # Logging and monitoring
@@ -109,10 +98,7 @@ class TrainingConfig(BaseSettings):
     agent_role: str = Field(default="Default", description="Agent role")
 
     model_config = SettingsConfigDict(
-        env_prefix="NLM_",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="ignore"
+        env_prefix="NLM_", env_nested_delimiter="__", case_sensitive=False, extra="ignore"
     )
 
     @field_validator("output_dir", "train_file", "eval_file")
@@ -143,14 +129,11 @@ class TrainingConfig(BaseSettings):
 
     def log_config(self) -> None:
         """Log configuration snapshot without sensitive data."""
-        logger.info("Training configuration loaded", extra={
-            "config": self.redacted_dict()
-        })
+        logger.info("Training configuration loaded", extra={"config": self.redacted_dict()})
 
 
 def load_config(
-    config_path: Optional[str] = None,
-    overrides: Optional[dict] = None
+    config_path: Optional[str] = None, overrides: Optional[dict] = None
 ) -> TrainingConfig:
     """
     Load training configuration from YAML file and environment variables.
@@ -193,4 +176,3 @@ def load_config(
 
     config.log_config()
     return config
-

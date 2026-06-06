@@ -26,11 +26,23 @@ except ImportError:  # pragma: no cover - exercised only when peft is absent
 # allow-listed to these so we never target arbitrary Linear layers (e.g. lm_head)
 # that would waste parameters or destabilize training.
 _LORA_CANDIDATE_MODULES: List[str] = [
-    "q_proj", "k_proj", "v_proj", "o_proj",          # llama / mistral / granite
-    "gate_proj", "up_proj", "down_proj",
-    "c_attn", "c_proj", "c_fc",                        # gpt2 (Conv1D)
-    "query_key_value", "dense",                        # bloom / falcon
-    "wqkv", "wo", "w1", "w2", "w3",                    # misc MoE / mixtral
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",  # llama / mistral / granite
+    "gate_proj",
+    "up_proj",
+    "down_proj",
+    "c_attn",
+    "c_proj",
+    "c_fc",  # gpt2 (Conv1D)
+    "query_key_value",
+    "dense",  # bloom / falcon
+    "wqkv",
+    "wo",
+    "w1",
+    "w2",
+    "w3",  # misc MoE / mixtral
 ]
 
 
@@ -142,7 +154,10 @@ def setup_lora_adapter(
     pct = (trainable / total * 100) if total else 0.0
     logger.info(
         "LoRA enabled on %s: %s trainable / %s total params (%.3f%%)",
-        valid_targets, f"{trainable:,}", f"{total:,}", pct,
+        valid_targets,
+        f"{trainable:,}",
+        f"{total:,}",
+        pct,
     )
     return peft_model
 
@@ -188,7 +203,11 @@ def _load_model(
     param_count = sum(p.numel() for p in model.parameters())
     logger.info(
         "Loaded %s model '%s': %s params, dtype=%s, device=%s",
-        role, model_id, f"{param_count:,}", dtype, device,
+        role,
+        model_id,
+        f"{param_count:,}",
+        dtype,
+        device,
     )
     return model
 

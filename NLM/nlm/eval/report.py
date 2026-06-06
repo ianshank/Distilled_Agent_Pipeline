@@ -27,9 +27,7 @@ def write_json_report(report: EvalReport, path: str) -> None:
 def _metric_rows(report: EvalReport) -> str:
     rows = []
     for name, value in sorted(report.metric_averages.items()):
-        rows.append(
-            f'<div class="metric"><strong>{html.escape(name)}:</strong> {value:.3f}</div>'
-        )
+        rows.append(f'<div class="metric"><strong>{html.escape(name)}:</strong> {value:.3f}</div>')
     for name, value in sorted(report.fidelity.items()):
         rows.append(
             f'<div class="metric"><strong>fidelity/{html.escape(name)}:</strong> {value:.3f}</div>'
@@ -43,15 +41,13 @@ def _case_rows(report: EvalReport, max_cases: int = 200) -> str:
         status_class = "case-pass" if case.passed else "case-fail"
         status_emoji = "PASS" if case.passed else "FAIL"
         score_str = ", ".join(f"{k}={v:.2f}" for k, v in case.scores.items()) or "n/a"
-        rows.append(
-            f"""
+        rows.append(f"""
     <div class="case {status_class}">
         <h4>[{status_emoji}] {html.escape(case.id)} &mdash; overall {case.overall:.2f}</h4>
         <p class="scores">{html.escape(score_str)}</p>
         <details><summary>prompt</summary><pre>{html.escape(case.prompt)}</pre></details>
         <details><summary>prediction</summary><pre>{html.escape(case.prediction)}</pre></details>
-    </div>"""
-        )
+    </div>""")
     return "\n".join(rows)
 
 

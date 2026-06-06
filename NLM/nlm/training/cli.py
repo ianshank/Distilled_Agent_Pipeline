@@ -26,13 +26,11 @@ from nlm.training import DistillationTrainer
 # Configure logging with structured format
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(
-            f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-        )
-    ]
+        logging.FileHandler(f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -49,10 +47,11 @@ def setup_wandb(config: TrainingConfig) -> None:
 
     try:
         import wandb
+
         wandb.init(
             project="nlm-distillation",
             name=f"{config.agent_name}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
-            config=config.redacted_dict()
+            config=config.redacted_dict(),
         )
         logger.info("Weights & Biases tracking enabled")
     except ImportError:
@@ -73,10 +72,7 @@ def save_training_metadata(config: TrainingConfig, output_dir: str) -> None:
         "config": config.redacted_dict(),
         "training_completed_at": datetime.now().isoformat(),
         "device": str(select_device(config.device_preference)),
-        "framework_versions": {
-            "torch": torch.__version__,
-            "python": sys.version
-        }
+        "framework_versions": {"torch": torch.__version__, "python": sys.version},
     }
 
     metadata_path = Path(output_dir) / "training_metadata.json"
@@ -117,18 +113,14 @@ def train(config: TrainingConfig) -> None:
     # Load dataset
     logger.info("Loading and tokenizing dataset")
     train_dataset = load_distillation_dataset(
-        train_file=config.train_file,
-        tokenizer=tokenizer,
-        max_length=config.max_length
+        train_file=config.train_file, tokenizer=tokenizer, max_length=config.max_length
     )
 
     eval_dataset = None
     if config.eval_file:
         logger.info("Loading evaluation dataset")
         eval_dataset = load_distillation_dataset(
-            train_file=config.eval_file,
-            tokenizer=tokenizer,
-            max_length=config.max_length
+            train_file=config.eval_file, tokenizer=tokenizer, max_length=config.max_length
         )
 
     # Load teacher model
@@ -136,7 +128,7 @@ def train(config: TrainingConfig) -> None:
         model_id=config.teacher_model_id,
         device=device,
         use_fp16=config.use_fp16,
-        use_device_map=config.use_device_map
+        use_device_map=config.use_device_map,
     )
 
     # Load student model
@@ -144,7 +136,7 @@ def train(config: TrainingConfig) -> None:
         model_id=config.student_model_id,
         device=device,
         use_fp16=config.use_fp16,
-        use_device_map=config.use_device_map
+        use_device_map=config.use_device_map,
     )
 
     # Setup LoRA if enabled
@@ -155,7 +147,7 @@ def train(config: TrainingConfig) -> None:
             rank=config.lora.rank,
             alpha=config.lora.alpha,
             dropout=config.lora.dropout,
-            target_modules=config.lora.target_modules
+            target_modules=config.lora.target_modules,
         )
 
     # Setup W&B tracking
@@ -189,7 +181,7 @@ def train(config: TrainingConfig) -> None:
         remove_unused_columns=False,
         report_to="wandb" if config.use_wandb else "none",
         logging_dir=str(output_dir / "logs"),
-        run_name=f"{config.agent_name}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        run_name=f"{config.agent_name}-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
     )
 
     # Create distillation trainer
@@ -201,7 +193,7 @@ def train(config: TrainingConfig) -> None:
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         distillation_alpha=config.distillation.alpha,
-        temperature=config.distillation.temperature
+        temperature=config.distillation.temperature,
     )
 
     # Add early stopping callback if eval dataset present
@@ -233,6 +225,7 @@ def train(config: TrainingConfig) -> None:
     if config.use_wandb:
         try:
             import wandb
+
             wandb.finish()
         except Exception:
             pass
@@ -242,15 +235,11 @@ def main() -> None:
     """Main entry point for CLI."""
     parser = argparse.ArgumentParser(
         description="NLM Distillation Training for Granite-4-MoE and compatible models",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     # Configuration file
-    parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to YAML configuration file"
-    )
+    parser.add_argument("--config", type=str, help="Path to YAML configuration file")
 
     # Model configuration
     parser.add_argument("--teacher-model-id", type=str, help="Teacher model ID")
@@ -306,7 +295,7 @@ def main() -> None:
         "learning_rate": args.learning_rate,
         "max_length": args.max_length,
         "agent_name": args.agent_name,
-        "agent_role": args.agent_role
+        "agent_role": args.agent_role,
     }
 
     for key, value in simple_mappings.items():
@@ -365,4 +354,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

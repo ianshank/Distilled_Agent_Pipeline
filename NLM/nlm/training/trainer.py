@@ -20,7 +20,7 @@ def compute_distillation_loss(
     teacher_logits: torch.Tensor,
     labels: torch.Tensor,
     alpha: float = 0.5,
-    temperature: float = 2.0
+    temperature: float = 2.0,
 ) -> Dict[str, torch.Tensor]:
     """
     Compute combined distillation loss.
@@ -43,7 +43,7 @@ def compute_distillation_loss(
         student_logits.view(-1, student_logits.size(-1)),
         labels.view(-1),
         ignore_index=-100,
-        reduction="sum"
+        reduction="sum",
     )
 
     # Count non-ignored tokens
@@ -61,7 +61,7 @@ def compute_distillation_loss(
         return {
             "total_loss": task_loss,
             "task_loss": task_loss,
-            "distillation_loss": torch.tensor(0.0, device=task_loss.device)
+            "distillation_loss": torch.tensor(0.0, device=task_loss.device),
         }
 
     # Distillation loss: KL divergence with temperature scaling
@@ -72,8 +72,8 @@ def compute_distillation_loss(
     distillation_loss = F.kl_div(
         F.log_softmax(student_logits_scaled, dim=-1),
         F.softmax(teacher_logits_scaled, dim=-1),
-        reduction="batchmean"
-    ) * (temperature ** 2)
+        reduction="batchmean",
+    ) * (temperature**2)
 
     # Combined loss
     total_loss = (1.0 - alpha) * task_loss + alpha * distillation_loss
@@ -81,7 +81,7 @@ def compute_distillation_loss(
     return {
         "total_loss": total_loss,
         "task_loss": task_loss,
-        "distillation_loss": distillation_loss
+        "distillation_loss": distillation_loss,
     }
 
 
@@ -99,7 +99,7 @@ class DistillationTrainer(Trainer):
         distillation_alpha: float = 0.5,
         temperature: float = 2.0,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize distillation trainer.
@@ -130,7 +130,7 @@ class DistillationTrainer(Trainer):
         model: PreTrainedModel,
         inputs: Dict[str, torch.Tensor],
         return_outputs: bool = False,
-        num_items_in_batch: Optional[int] = None
+        num_items_in_batch: Optional[int] = None,
     ) -> torch.Tensor:
         """
         Compute distillation loss for training step.
@@ -162,16 +162,18 @@ class DistillationTrainer(Trainer):
             teacher_logits=teacher_outputs.logits,
             labels=labels,
             alpha=self.distillation_alpha,
-            temperature=self.temperature
+            temperature=self.temperature,
         )
 
         total_loss = loss_dict["total_loss"]
 
         # Log component losses for monitoring
-        self.log({
-            "train/task_loss": loss_dict["task_loss"].item(),
-            "train/distillation_loss": loss_dict["distillation_loss"].item(),
-        })
+        self.log(
+            {
+                "train/task_loss": loss_dict["task_loss"].item(),
+                "train/distillation_loss": loss_dict["distillation_loss"].item(),
+            }
+        )
 
         if return_outputs:
             return total_loss, student_outputs
@@ -183,7 +185,7 @@ class DistillationTrainer(Trainer):
         model: PreTrainedModel,
         inputs: Dict[str, torch.Tensor],
         prediction_loss_only: bool,
-        ignore_keys: Optional[list] = None
+        ignore_keys: Optional[list] = None,
     ):
         """
         Prediction step for evaluation.
@@ -214,7 +216,7 @@ class DistillationTrainer(Trainer):
                 teacher_logits=teacher_outputs.logits,
                 labels=labels,
                 alpha=self.distillation_alpha,
-                temperature=self.temperature
+                temperature=self.temperature,
             )
 
             loss = loss_dict["total_loss"]
@@ -223,4 +225,3 @@ class DistillationTrainer(Trainer):
             return (loss, None, None)
 
         return (loss, student_outputs.logits, labels)
-

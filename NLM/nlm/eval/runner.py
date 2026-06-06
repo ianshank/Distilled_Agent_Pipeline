@@ -174,9 +174,7 @@ def evaluate(
         if case_passed:
             passed_count += 1
 
-    metric_averages = {
-        name: metric_totals[name] / metric_weights[name] for name in metric_totals
-    }
+    metric_averages = {name: metric_totals[name] / metric_weights[name] for name in metric_totals}
     overall_score = weighted_overall / total_weight if total_weight else 0.0
     pass_rate = passed_count / len(cases)
 

@@ -42,7 +42,7 @@ def top1_agreement(
     min_vocab = min(student_logits.size(-1), teacher_logits.size(-1))
     student_pred = student_logits[..., :min_vocab].argmax(dim=-1)
     teacher_pred = teacher_logits[..., :min_vocab].argmax(dim=-1)
-    match = (student_pred == teacher_pred)
+    match = student_pred == teacher_pred
 
     if attention_mask is not None:
         mask = attention_mask.bool()
@@ -88,7 +88,7 @@ def kl_fidelity(
     # FP16 softmax probabilities underflow to 0.0.
     per_position = F.kl_div(
         student_log_probs, teacher_log_probs, reduction="none", log_target=True
-    ).sum(dim=-1) * (temperature ** 2)
+    ).sum(dim=-1) * (temperature**2)
 
     if attention_mask is not None:
         mask = attention_mask.to(per_position.dtype)
@@ -152,9 +152,7 @@ def evaluate_fidelity(
             teacher_logits = teacher_model(**inputs).logits
 
         agreements.append(top1_agreement(student_logits, teacher_logits, attention_mask))
-        divergences.append(
-            kl_fidelity(student_logits, teacher_logits, temperature, attention_mask)
-        )
+        divergences.append(kl_fidelity(student_logits, teacher_logits, temperature, attention_mask))
 
     n = max(len(prompts), 1)
     return {

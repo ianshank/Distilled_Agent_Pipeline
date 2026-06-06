@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from peft import PeftModel
+
     PEFT_AVAILABLE = True
 except ImportError:
     PEFT_AVAILABLE = False
@@ -109,7 +110,7 @@ class InferenceServer:
                 torch_dtype=torch.float16 if self.device.type == "cuda" else torch.float32,
                 device_map="auto" if self.device.type == "cuda" else None,
                 trust_remote_code=True,
-                low_cpu_mem_usage=True
+                low_cpu_mem_usage=True,
             )
 
             # Check for LoRA adapter
@@ -150,7 +151,7 @@ class InferenceServer:
                 return_tensors="pt",
                 truncation=True,
                 max_length=request.max_length,
-                padding=True
+                padding=True,
             )
 
             # Move to device
@@ -168,18 +169,16 @@ class InferenceServer:
                     num_return_sequences=request.num_return_sequences,
                     pad_token_id=self.tokenizer.pad_token_id,
                     eos_token_id=self.tokenizer.eos_token_id,
-                    repetition_penalty=request.repetition_penalty
+                    repetition_penalty=request.repetition_penalty,
                 )
 
             # Decode outputs
             responses = []
             for output in outputs:
                 # Remove input tokens from output
-                response_tokens = output[inputs["input_ids"].shape[1]:]
+                response_tokens = output[inputs["input_ids"].shape[1] :]
                 response_text = self.tokenizer.decode(
-                    response_tokens,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=True
+                    response_tokens, skip_special_tokens=True, clean_up_tokenization_spaces=True
                 )
                 responses.append(response_text.strip())
 
@@ -194,8 +193,8 @@ class InferenceServer:
                     "top_k": request.top_k,
                     "do_sample": request.do_sample,
                     "num_return_sequences": request.num_return_sequences,
-                    "repetition_penalty": request.repetition_penalty
-                }
+                    "repetition_penalty": request.repetition_penalty,
+                },
             )
 
         except Exception as e:
@@ -266,20 +265,12 @@ def main():
         "--model-dir",
         type=str,
         default=os.getenv("MODEL_DIR", "outputs/default/final"),
-        help="Path to model directory"
+        help="Path to model directory",
     )
     parser.add_argument(
-        "--port",
-        type=int,
-        default=int(os.getenv("PORT", 8080)),
-        help="Server port"
+        "--port", type=int, default=int(os.getenv("PORT", 8080)), help="Server port"
     )
-    parser.add_argument(
-        "--host",
-        type=str,
-        default="0.0.0.0",
-        help="Server host"
-    )
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Server host")
 
     args = parser.parse_args()
 
@@ -293,4 +284,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

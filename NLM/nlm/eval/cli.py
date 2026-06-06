@@ -50,9 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=",".join(DEFAULT_METRICS),
         help="Comma-separated reference metrics (exact_match,token_f1,rouge_l)",
     )
-    parser.add_argument(
-        "--max-new-tokens", type=int, default=256, help="Max generation length"
-    )
+    parser.add_argument("--max-new-tokens", type=int, default=256, help="Max generation length")
     parser.add_argument(
         "--do-sample", action="store_true", help="Enable sampling (default greedy/deterministic)"
     )

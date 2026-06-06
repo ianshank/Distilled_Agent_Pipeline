@@ -22,7 +22,7 @@ def convert_jsonl_format(
     input_file: str,
     output_file: str,
     prompt_key: str = "prompt",
-    completion_key: str = "completion"
+    completion_key: str = "completion",
 ) -> int:
     """
     Convert JSONL with prompt/completion format to text format.
@@ -65,9 +65,7 @@ def convert_jsonl_format(
 
                 # Skip if either is empty
                 if not prompt or not completion:
-                    logger.warning(
-                        f"Skipping line {line_num}: missing prompt or completion"
-                    )
+                    logger.warning(f"Skipping line {line_num}: missing prompt or completion")
                     skipped_count += 1
                     continue
 
@@ -84,9 +82,7 @@ def convert_jsonl_format(
                 skipped_count += 1
                 continue
 
-    logger.info(
-        f"Converted {converted_count} examples from {input_file} to {output_file}"
-    )
+    logger.info(f"Converted {converted_count} examples from {input_file} to {output_file}")
     if skipped_count > 0:
         logger.warning(f"Skipped {skipped_count} invalid or empty lines")
 
@@ -94,8 +90,7 @@ def convert_jsonl_format(
 
 
 def find_training_file(
-    train_file: Optional[str] = None,
-    sagemaker_channel: str = "SM_CHANNEL_TRAIN"
+    train_file: Optional[str] = None, sagemaker_channel: str = "SM_CHANNEL_TRAIN"
 ) -> str:
     """
     Locate training file with priority: explicit path > SageMaker env > error.
@@ -127,9 +122,7 @@ def find_training_file(
             logger.info(f"Found training file: {selected_file}")
             return selected_file
         else:
-            raise FileNotFoundError(
-                f"No .jsonl files found in SageMaker directory: {train_dir}"
-            )
+            raise FileNotFoundError(f"No .jsonl files found in SageMaker directory: {train_dir}")
 
     # Priority 3: Fallback to default path
     if train_file:
@@ -148,7 +141,7 @@ def load_distillation_dataset(
     train_file: Optional[str],
     tokenizer: PreTrainedTokenizer,
     max_length: int = 512,
-    text_key: str = "text"
+    text_key: str = "text",
 ) -> Dataset:
     """
     Load and tokenize dataset for distillation training.
@@ -190,9 +183,7 @@ def load_distillation_dataset(
             texts = examples[text_key]
         elif "prompt" in examples and "completion" in examples:
             # Handle prompt/completion format on-the-fly
-            texts = [
-                f"{p}\n{c}" for p, c in zip(examples["prompt"], examples["completion"])
-            ]
+            texts = [f"{p}\n{c}" for p, c in zip(examples["prompt"], examples["completion"])]
         else:
             # Fallback to first column
             first_key = list(examples.keys())[0]
@@ -205,7 +196,7 @@ def load_distillation_dataset(
             truncation=True,
             padding="max_length",
             max_length=max_length,
-            return_tensors=None  # Return lists for datasets
+            return_tensors=None,  # Return lists for datasets
         )
 
         # Add labels for language modeling (copy of input_ids)
@@ -218,10 +209,9 @@ def load_distillation_dataset(
         tokenize_function,
         batched=True,
         remove_columns=dataset["train"].column_names,
-        desc="Tokenizing dataset"
+        desc="Tokenizing dataset",
     )
 
     logger.info(f"Dataset tokenized: {len(tokenized_dataset)} examples")
 
     return tokenized_dataset
-

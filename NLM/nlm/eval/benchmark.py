@@ -38,9 +38,7 @@ class EvalCase(BaseModel):
         default_factory=list, description="Keywords/phrases expected in the output"
     )
     weight: float = Field(default=1.0, gt=0.0, description="Aggregate scoring weight")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Arbitrary case metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Arbitrary case metadata")
 
 
 class CaseResult(BaseModel):
