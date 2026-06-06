@@ -51,7 +51,10 @@ pip install -e ".[ml,dev]"
 ```
 
 This installs console entry points: `nlm-train`, `nlm-serve`, `nlm-eval`,
-and `nlm-validate-data`.
+and `nlm-validate-data`. Note that `nlm-train`, `nlm-serve`, and `nlm-eval`
+require the `[ml]` extra (torch/transformers) at runtime; only
+`nlm-validate-data` (and the pure-Python metric APIs) work on a light
+`pip install -e .`.
 
 ### Run Smoke Test
 

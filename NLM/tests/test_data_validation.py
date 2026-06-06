@@ -16,10 +16,13 @@ def _write_jsonl(path, records):
 class TestValidateDataset:
     def test_valid_prompt_completion(self, temp_dir):
         path = temp_dir / "d.jsonl"
-        _write_jsonl(path, [
-            {"prompt": "a", "completion": "x"},
-            {"prompt": "b", "completion": "y"},
-        ])
+        _write_jsonl(
+            path,
+            [
+                {"prompt": "a", "completion": "x"},
+                {"prompt": "b", "completion": "y"},
+            ],
+        )
         report = validate_dataset(str(path))
         assert report.passed is True
         assert report.valid_records == 2
@@ -74,10 +77,13 @@ class TestValidateDataset:
 
     def test_duplicate_prompts_warned_not_fatal(self, temp_dir):
         path = temp_dir / "d.jsonl"
-        _write_jsonl(path, [
-            {"prompt": "dup", "completion": "x"},
-            {"prompt": "dup", "completion": "y"},
-        ])
+        _write_jsonl(
+            path,
+            [
+                {"prompt": "dup", "completion": "x"},
+                {"prompt": "dup", "completion": "y"},
+            ],
+        )
         report = validate_dataset(str(path))
         assert report.duplicate_prompts == 1
         assert report.passed is True  # duplicates are a warning by default
@@ -98,12 +104,30 @@ class TestValidateDataset:
 
     def test_strict_treats_warnings_as_failure(self, temp_dir):
         path = temp_dir / "d.jsonl"
-        _write_jsonl(path, [
-            {"prompt": "dup", "completion": "x"},
-            {"prompt": "dup", "completion": "y"},
-        ])
+        _write_jsonl(
+            path,
+            [
+                {"prompt": "dup", "completion": "x"},
+                {"prompt": "dup", "completion": "y"},
+            ],
+        )
         report = validate_dataset(str(path), strict=True)
         assert report.passed is False
+
+    def test_unhashable_key_does_not_crash(self, temp_dir):
+        # A list/dict prompt is coerced to a string for duplicate detection
+        # rather than raising TypeError on an unhashable key.
+        path = temp_dir / "d.jsonl"
+        _write_jsonl(
+            path,
+            [
+                {"prompt": ["a", "b"], "completion": "x"},
+                {"prompt": ["a", "b"], "completion": "y"},
+            ],
+        )
+        report = validate_dataset(str(path))
+        assert report.valid_records == 2
+        assert report.duplicate_prompts == 1
 
     def test_missing_file_raises(self, temp_dir):
         with pytest.raises(FileNotFoundError):

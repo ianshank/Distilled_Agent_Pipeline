@@ -61,6 +61,11 @@ cases.
 
 ## CLI usage
 
+> **Dependencies:** the CLI loads the model via the inference server
+> (torch/transformers/flask), so it requires the `[ml]` extra:
+> `pip install -e ".[ml]"`. The pure-Python scoring metrics and benchmark
+> loading work without it.
+
 ```bash
 cd NLM
 python -m nlm.eval.cli \

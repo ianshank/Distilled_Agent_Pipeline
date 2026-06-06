@@ -131,8 +131,11 @@ def validate_dataset(
             report.valid_records += 1
             schemas_seen.add(schema)
 
-            # Duplicate detection on the natural key for the schema.
-            key = record.get("prompt") if schema == "prompt_completion" else record.get("text")
+            # Duplicate detection on the natural key for the schema. Coerce to a
+            # stripped string (consistent with _classify_record) so unhashable
+            # values (e.g. a JSON array/object) cannot crash validation.
+            raw_key = record.get("prompt") if schema == "prompt_completion" else record.get("text")
+            key = str(raw_key).strip()
             if key in seen_keys:
                 report.duplicate_prompts += 1
             else:

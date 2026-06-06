@@ -27,17 +27,17 @@ def temp_dir():
 def sample_jsonl_prompt_completion(temp_dir):
     """Create sample JSONL file with prompt/completion format."""
     jsonl_file = temp_dir / "train_prompt_completion.jsonl"
-    
+
     data = [
         {"prompt": "What is AI?", "completion": "Artificial Intelligence is..."},
         {"prompt": "Explain ML", "completion": "Machine Learning is..."},
-        {"prompt": "Define NLP", "completion": "Natural Language Processing is..."}
+        {"prompt": "Define NLP", "completion": "Natural Language Processing is..."},
     ]
-    
+
     with open(jsonl_file, "w") as f:
         for record in data:
             f.write(json.dumps(record) + "\n")
-    
+
     return jsonl_file
 
 
@@ -45,17 +45,17 @@ def sample_jsonl_prompt_completion(temp_dir):
 def sample_jsonl_text(temp_dir):
     """Create sample JSONL file with text format."""
     jsonl_file = temp_dir / "train_text.jsonl"
-    
+
     data = [
         {"text": "This is sample text one."},
         {"text": "This is sample text two."},
-        {"text": "This is sample text three."}
+        {"text": "This is sample text three."},
     ]
-    
+
     with open(jsonl_file, "w") as f:
         for record in data:
             f.write(json.dumps(record) + "\n")
-    
+
     return jsonl_file
 
 
@@ -63,7 +63,7 @@ def sample_jsonl_text(temp_dir):
 def sample_config_yaml(temp_dir):
     """Create sample YAML configuration file."""
     config_file = temp_dir / "config.yaml"
-    
+
     config = """
 teacher_model_id: "sshleifer/tiny-gpt2"
 student_model_id: "sshleifer/tiny-gpt2"
@@ -78,10 +78,10 @@ distillation:
   alpha: 0.5
   temperature: 2.0
 """
-    
+
     with open(config_file, "w") as f:
         f.write(config)
-    
+
     return config_file
 
 
@@ -102,4 +102,3 @@ def mock_device_cpu(monkeypatch):
     monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     if hasattr(torch.backends, "mps"):
         monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
-

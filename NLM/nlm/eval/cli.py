@@ -103,14 +103,18 @@ def _maybe_add_fidelity(
         return
     try:
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoModelForCausalLM
 
         from nlm.eval.fidelity import evaluate_fidelity
 
         # Reuse the already-loaded student model rather than loading it a second
         # time, which would double memory use and risk OOM on large models.
         student = generator.server
-        tokenizer = AutoTokenizer.from_pretrained(args.teacher_model_dir)
+        # Fidelity compares logits position-by-position, so both models must
+        # receive identical input_ids. Use the student's tokenizer (already
+        # loaded) — fidelity is only meaningful when tokenization matches the
+        # student's input space.
+        tokenizer = student.tokenizer
         teacher = AutoModelForCausalLM.from_pretrained(
             args.teacher_model_dir,
             torch_dtype=torch.float16 if student.device.type == "cuda" else torch.float32,
