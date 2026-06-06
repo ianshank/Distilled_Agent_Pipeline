@@ -79,6 +79,13 @@ def test_empty_cases_raises():
         evaluate([], EchoGenerator())
 
 
+def test_resolve_generate_rejects_non_callable():
+    from nlm.eval.runner import _resolve_generate
+
+    with pytest.raises(TypeError):
+        _resolve_generate(object())
+
+
 def test_metric_averages_only_include_applicable():
     cases = [
         EvalCase(id="c1", prompt="p1", reference="r"),

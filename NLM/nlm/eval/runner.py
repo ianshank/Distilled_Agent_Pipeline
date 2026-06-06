@@ -25,7 +25,7 @@ class Generator(Protocol):
         ...
 
 
-class ModelGenerator:
+class ModelGenerator:  # pragma: no cover - torch/model-backed integration adapter
     """
     Generator backed by a local model directory.
 

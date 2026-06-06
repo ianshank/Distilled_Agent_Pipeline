@@ -1,9 +1,8 @@
 """Pytest configuration and shared fixtures."""
 
-import os
+import json
 import sys
 import tempfile
-import json
 from pathlib import Path
 
 import pytest

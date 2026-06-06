@@ -5,9 +5,10 @@ Tests complete training pipeline with tiny models to verify
 all components work together correctly.
 """
 
-import pytest
 import json
 from pathlib import Path
+
+import pytest
 
 from nlm.config import TrainingConfig
 from nlm.training.cli import train

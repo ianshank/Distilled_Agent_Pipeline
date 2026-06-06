@@ -5,9 +5,7 @@ Tests Pydantic validation, YAML loading, environment variable override,
 and path sanitization.
 """
 
-import os
 import pytest
-from pathlib import Path
 from pydantic import ValidationError
 
 from nlm.config import TrainingConfig, load_config

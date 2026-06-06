@@ -79,6 +79,14 @@ class TestRougeL:
         assert rouge_l("word", "") == 0.0
 
 
+class TestLcsHelper:
+    def test_lcs_empty_returns_zero(self):
+        from nlm.eval.metrics import _lcs_length
+
+        assert _lcs_length([], ["a"]) == 0
+        assert _lcs_length(["a"], []) == 0
+
+
 class TestKeywordRecall:
     def test_all_present(self):
         assert keyword_recall("import FastAPI from app", ["FastAPI", "import"]) == 1.0

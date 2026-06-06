@@ -129,6 +129,17 @@ class TestValidateDataset:
         assert report.valid_records == 2
         assert report.duplicate_prompts == 1
 
+    def test_non_dict_json_line_is_invalid(self, temp_dir):
+        # A bare JSON scalar/array is valid JSON but not a record.
+        path = temp_dir / "d.jsonl"
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("123\n")
+            f.write(json.dumps([1, 2, 3]) + "\n")
+        report = validate_dataset(str(path))
+        assert report.valid_records == 0
+        assert report.invalid_records == 2
+        assert report.passed is False
+
     def test_missing_file_raises(self, temp_dir):
         with pytest.raises(FileNotFoundError):
             validate_dataset(str(temp_dir / "nope.jsonl"))
@@ -167,3 +178,41 @@ class TestCLI:
 
         rc = main(["--path", str(temp_dir / "nope.jsonl")])
         assert rc == 1
+
+    def test_cli_json_output(self, temp_dir, capsys):
+        from nlm.data.validation import main
+
+        path = temp_dir / "d.jsonl"
+        _write_jsonl(path, [{"text": "a"}])
+        rc = main(["--path", str(path), "--json"])
+        out = capsys.readouterr().out
+        assert rc == 0
+        assert json.loads(out)["valid_records"] == 1
+
+    def test_cli_prints_errors_and_warnings(self, temp_dir, capsys):
+        from nlm.data.validation import main
+
+        path = temp_dir / "d.jsonl"
+        # One duplicate (warning) + one invalid JSON line (error).
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"prompt": "dup", "completion": "x"}) + "\n")
+            f.write(json.dumps({"prompt": "dup", "completion": "y"}) + "\n")
+            f.write("not json{\n")
+        rc = main(["--path", str(path)])
+        out = capsys.readouterr().out
+        assert rc == 1
+        assert "error:" in out
+        assert "warn:" in out
+
+    def test_cli_writes_github_output(self, temp_dir, monkeypatch):
+        from nlm.data.validation import main
+
+        path = temp_dir / "d.jsonl"
+        _write_jsonl(path, [{"text": "a"}, {"text": "b"}])
+        gh = temp_dir / "gh_output"
+        monkeypatch.setenv("GITHUB_OUTPUT", str(gh))
+        rc = main(["--path", str(path)])
+        content = gh.read_text()
+        assert rc == 0
+        assert "total_valid_records=2" in content
+        assert "all_passed=true" in content

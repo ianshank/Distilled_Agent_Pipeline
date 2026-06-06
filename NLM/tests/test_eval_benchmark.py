@@ -68,6 +68,21 @@ class TestLoadBenchmark:
         with pytest.raises(ValueError):
             load_benchmark(str(path))
 
+    def test_invalid_evalcase_is_skipped(self, temp_dir):
+        # weight must be > 0; an invalid record is logged and skipped, not fatal,
+        # as long as at least one valid case remains.
+        path = temp_dir / "bench.jsonl"
+        _write_jsonl(
+            path,
+            [
+                {"prompt": "good", "weight": 1.0},
+                {"prompt": "bad", "weight": 0},
+            ],
+        )
+        cases = load_benchmark(str(path))
+        assert len(cases) == 1
+        assert cases[0].prompt == "good"
+
 
 class TestEvalReport:
     def test_to_dict_roundtrip(self):

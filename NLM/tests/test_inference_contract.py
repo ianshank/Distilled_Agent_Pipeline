@@ -5,12 +5,13 @@ Tests Flask/SageMaker inference endpoints return schema-compliant JSON
 and handle errors correctly.
 """
 
-import pytest
 import json
 from unittest.mock import Mock, patch
 
-from nlm.inference.server import InferenceRequest, InferenceResponse, create_flask_app
+import pytest
 from pydantic import ValidationError
+
+from nlm.inference.server import InferenceRequest, InferenceResponse, create_flask_app
 
 
 class TestInferenceRequest:

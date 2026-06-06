@@ -5,12 +5,11 @@ Tests JSONL format conversion, file discovery, tokenization,
 and error handling.
 """
 
-import os
 import json
-import pytest
-from pathlib import Path
 
-from nlm.data import load_distillation_dataset, convert_jsonl_format
+import pytest
+
+from nlm.data import convert_jsonl_format, load_distillation_dataset
 
 
 class TestConvertJsonlFormat:

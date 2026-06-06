@@ -82,3 +82,17 @@ ignore_missing_imports = true
 warn_unused_ignores = false
 warn_redundant_casts = true
 no_implicit_optional = true
+
+[tool.coverage.run]
+branch = true
+source = ["nlm"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
