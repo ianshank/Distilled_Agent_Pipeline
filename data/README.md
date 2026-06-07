@@ -55,7 +55,11 @@ Training data is stored in JSONL (JSON Lines) format. Each line is a valid JSON 
 ### Validate Dataset
 
 ```bash
-python scripts/evaluation/validate_dataset.py --data-file data/agents/architect_agent.jsonl
+# After `pip install -e ./NLM`
+nlm-validate-data --path data/agents/architect_agent.jsonl --min-samples 5
+
+# Or as a module
+python -m nlm.data.validation --path data/agents/architect_agent.jsonl
 ```
 
 ### Convert Format
@@ -78,7 +82,7 @@ To add new training data:
 
 1. Create JSONL file in `agents/` directory
 2. Use either `text` or `prompt`/`completion` format
-3. Validate using `validate_dataset.py`
+3. Validate using `nlm-validate-data` (`python -m nlm.data.validation`)
 4. Reference in training configuration
 
 ## Data Guidelines

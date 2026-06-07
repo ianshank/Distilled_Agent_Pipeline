@@ -59,6 +59,9 @@ logs/
 outputs/
 checkpoints/
 models/
+# ...but keep the source package (model loaders / device selection), not weights
+!NLM/nlm/models/
+!NLM/nlm/models/**
 *.pth
 *.pt
 *.ckpt

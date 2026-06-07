@@ -23,24 +23,28 @@ Scripts for running training jobs on AWS SageMaker:
 
 Scripts for infrastructure management and deployment:
 
-- `setup_infrastructure.py` - Set up required infrastructure
-- `verify_infrastructure.py` - Verify infrastructure configuration
 - `security_scan.py` - Security scanning and validation
 - `generate_deployment_summary.py` - Generate deployment reports
 - `notify_failure.py` - Send failure notifications
-- `package_to_onnx.py` - Package models to ONNX format
 
 ## Evaluation Scripts
 
-Scripts for training, evaluation, and inference:
+Legacy standalone SageMaker entrypoints (kept for backwards compatibility):
 
-- `train_agent_skill.py` - Train specific agent skills
-- `train_software_development_agent.py` - Train software development agents
-- `train_distilled_adapter.py` - Train distilled model adapters
-- `evaluate_agent_skill.py` - Evaluate trained agent performance
-- `register_agent_skill.py` - Register agents in skill registry
-- `validate_dataset.py` - Validate training datasets
-- `inference.py` - Inference utilities and helpers
+- `train_distilled_adapter.py` - Standalone SageMaker distillation trainer
+- `inference.py` - Standalone SageMaker inference handler
+
+> **Note:** The maintained training, inference, evaluation, and dataset-validation
+> functionality now lives in the `nlm` package (`NLM/nlm/`). Prefer:
+> - Training: `nlm-train` / `python -m nlm.training.cli`
+> - Inference: `nlm-serve` / `python -m nlm.inference.server`
+> - Agent evaluation: `nlm-eval` / `python -m nlm.eval.cli`
+> - Dataset validation: `nlm-validate-data` / `python -m nlm.data.validation`
+>
+> Several broken legacy scripts that imported a non-existent
+> `agents.automated_training_system` module (agent-skill training/evaluation/
+> registration and infrastructure setup/verify/ONNX packaging) were removed
+> during a gap-analysis cleanup.
 
 ## Usage
 
@@ -50,8 +54,8 @@ Most scripts can be run directly:
 # Example: Launch SageMaker training
 python scripts/sagemaker/launch_sagemaker_training_jobs.py
 
-# Example: Validate dataset
-python scripts/evaluation/validate_dataset.py --data-file data/agents/architect_agent.jsonl
+# Example: Validate a dataset (now provided by the nlm package)
+nlm-validate-data --path data/agents/architect_agent.jsonl --min-samples 5
 ```
 
 Refer to individual script documentation for specific usage instructions.

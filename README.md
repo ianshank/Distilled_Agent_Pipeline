@@ -40,9 +40,21 @@ cd Distilled_Agent_Pipeline/NLM
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install the package (editable). Extras:
+#   .[ml]   -> torch/transformers/peft for training, inference, fidelity
+#   .[dev]  -> pytest, ruff, black, mypy, pre-commit
+#   .[aws]  -> sagemaker/boto3
+pip install -e ".[ml,dev]"
+
+# Light install (config + evaluation metrics + dataset validation only, no torch):
+#   pip install -e .
 ```
+
+This installs console entry points: `nlm-train`, `nlm-serve`, `nlm-eval`,
+and `nlm-validate-data`. Note that `nlm-train`, `nlm-serve`, and `nlm-eval`
+require the `[ml]` extra (torch/transformers) at runtime; only
+`nlm-validate-data` (and the pure-Python metric APIs) work on a light
+`pip install -e .`.
 
 ### Run Smoke Test
 
@@ -91,10 +103,11 @@ Distilled_Agent_Pipeline/
 ├── NLM/                          # Core distillation framework
 │   ├── nlm/                      # Python package
 │   │   ├── config/              # Configuration management
-│   │   ├── data/                # Dataset loading
-│   │   ├── models/              # Model loaders, device selection
+│   │   ├── data/                # Dataset loading + validation
+│   │   ├── models/              # Model loaders, device selection, LoRA setup
 │   │   ├── training/            # Training engine & CLI
-│   │   └── inference/           # Inference server
+│   │   ├── inference/           # Inference server
+│   │   └── eval/                # Distilled-agent evaluation harness
 │   ├── tests/                    # Comprehensive test suite
 │   ├── config/                   # Configuration files
 │   ├── ARCHITECTURE.md           # Detailed architecture docs
@@ -250,6 +263,29 @@ pytest tests/ --cov=nlm --cov-report=html
 - **Unit Tests** (40+): Config, data, models, loss computation
 - **Contract Tests** (10+): API schema validation, Flask endpoints
 - **Integration Tests** (2): End-to-end training with tiny models
+- **Eval Harness Tests** (40+): Scoring metrics, benchmark loading, runner, teacher-student fidelity
+
+## Evaluation Harness
+
+Training optimizes a distillation loss, but loss alone doesn't tell you whether
+the resulting agent answers prompts correctly. The evaluation harness
+(`NLM/nlm/eval/`) scores a trained student against a held-out JSONL **benchmark**
+using generation-quality metrics (exact match, token F1, ROUGE-L), behavioral
+keyword checks, and optional **teacher-student fidelity** (top-1 agreement, KL
+divergence). It emits JSON + HTML reports and a pass/fail gate for CI.
+
+```bash
+cd NLM
+python -m nlm.eval.cli \
+  --model-dir outputs/swe_agent/final \
+  --benchmark benchmarks/swe_agent_eval.jsonl \
+  --output-dir eval_outputs/swe_agent \
+  --threshold 0.6
+```
+
+The process exits non-zero when the overall score is below `--threshold`. See
+[docs/EVALUATION_HARNESS.md](docs/EVALUATION_HARNESS.md) for the benchmark
+format, metric definitions, and Python API.
 
 ## Performance
 
@@ -353,10 +389,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Roadmap
 
 ### v1.1 (Next Release)
+- [x] Distilled-agent evaluation harness (metrics, benchmarks, fidelity, reports)
+- [x] `nlm.models` loaders (device selection, teacher/student, guarded LoRA)
+- [x] Packaging (`pyproject.toml`, entry points) + lint/type config
+- [x] Dataset validation (`nlm.data.validation`)
+- [x] GitHub Actions CI/CD pipeline (tiered: fast / full / lint / validate-data)
 - [ ] Multi-GPU training support (DistributedDataParallel)
 - [ ] Model quantization (INT8/INT4) for inference
 - [ ] MLflow model registry integration
-- [ ] GitHub Actions CI/CD pipeline
 
 ### v1.2 (Future)
 - [ ] Multi-teacher distillation

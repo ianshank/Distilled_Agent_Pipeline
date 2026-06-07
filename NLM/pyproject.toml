@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nlm"
+version = "0.1.0"
+description = "Knowledge distillation framework for training specialized AI agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ian Cruickshank" }]
+keywords = ["distillation", "llm", "lora", "agents", "transformers"]
+
+# Core dependencies are intentionally light so config, evaluation metrics, and
+# dataset validation can be installed and tested without the heavy ML stack.
+# Training/inference/fidelity require the optional "ml" extra.
+dependencies = [
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+ml = [
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    "datasets>=2.12.0",
+    "accelerate>=0.22.0",
+    "peft>=0.4.0",
+    "flask>=2.3.0",
+    "gunicorn>=21.0.0",
+]
+aws = [
+    "sagemaker>=2.150.0",
+    "boto3>=1.26.0",
+    "botocore>=1.29.0",
+]
+monitoring = [
+    "wandb>=0.15.0",
+    "tensorboard>=2.13.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "ruff>=0.4.0",
+    "black>=23.0.0",
+    "mypy>=1.4.0",
+    "pre-commit>=3.3.0",
+]
+
+[project.scripts]
+nlm-train = "nlm.training.cli:main"
+nlm-serve = "nlm.inference.server:main"
+nlm-eval = "nlm.eval.cli:main"
+nlm-validate-data = "nlm.data.validation:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nlm*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# High-signal rules that fit the existing code style (pycodestyle errors/warnings,
+# pyflakes, import sorting). pyupgrade/bugbear are intentionally omitted so the
+# established List/Optional typing style is not force-rewritten across the tree.
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]  # line length is governed by the formatter
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_ignores = false
+warn_redundant_casts = true
+no_implicit_optional = true
+
+[tool.coverage.run]
+branch = true
+source = ["nlm"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]

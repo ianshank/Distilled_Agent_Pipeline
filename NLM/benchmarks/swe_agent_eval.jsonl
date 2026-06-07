@@ -1,0 +1,6 @@
+{"id": "swe-fastapi-ping", "prompt": "Write a FastAPI application that exposes a /ping endpoint returning JSON status.", "keywords": ["FastAPI", "@app.get", "/ping", "return"], "metadata": {"category": "api"}}
+{"id": "swe-jwt-auth", "prompt": "Implement JWT-based authentication middleware for a Python web service.", "keywords": ["jwt", "token", "decode", "Authorization"], "metadata": {"category": "authentication"}}
+{"id": "swe-rate-limit", "prompt": "Add rate limiting to a REST API endpoint.", "keywords": ["rate", "limit", "requests"], "metadata": {"category": "api"}}
+{"id": "swe-k8s-deploy", "prompt": "Write a Kubernetes Deployment manifest for a Node.js application with 3 replicas.", "keywords": ["apiVersion", "kind: Deployment", "replicas: 3", "containers"], "metadata": {"category": "deployment"}}
+{"id": "swe-db-schema", "prompt": "Design a normalized SQL schema for a user management system.", "keywords": ["CREATE TABLE", "PRIMARY KEY", "users"], "metadata": {"category": "database"}}
+{"id": "swe-pytest", "prompt": "Write a pytest unit test for a function that adds two numbers.", "reference": "def test_add():\n    assert add(2, 3) == 5", "keywords": ["def test_", "assert"], "metadata": {"category": "testing"}}
